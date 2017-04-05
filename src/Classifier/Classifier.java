@@ -127,6 +127,9 @@ public class Classifier {
         x_avg /= series.getItemCount();
         y_avg /= series.getItemCount();
         
+        /**
+         * 
+         */
         for (int i = 0; i < series.getItemCount(); i++) {
             double x_dist = Math.abs(((Double) series.getX(i) - x_avg));
             double y_dist = Math.abs(((Double) series.getY(i) - y_avg));
