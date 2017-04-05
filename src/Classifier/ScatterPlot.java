@@ -5,8 +5,6 @@
  */
 package Classifier;
 
-import Controller.Controller;
-
 // Import List and Set Library
 import java.util.List;
 import java.util.Set;
@@ -47,21 +45,20 @@ public class ScatterPlot extends JFrame {
      * it into a new ChartPanel
      * 
      */
-    public ScatterPlot(String title) {
+    public ScatterPlot(List<List<Double>> dataset, List<String> datalabel, Set<String> label, String title, String[] selectedHeader) {
         super(title); // Call the parent constructor
         cl = new Classifier(); // Create new Classifier object
         
         // Call @method createDataset to initialize dataset grouping
-        cl.createDataset(Controller.dataset, Controller.datalabel, Controller.label, Controller.selectedHeader, title);
+        cl.createDataset(dataset, datalabel, label, selectedHeader, title);
         
         // Assign @attribute dataset with the return of @method getDataset
         this.dataset = cl.getDataset();
         
         // Create new JFreeChart object with the provided chart title, title of
         // x-axis and y-axis, and @attribute dataset
-        JFreeChart chart = ChartFactory.createScatterPlot(title, Controller.selectedHeader[0], 
-                Controller.selectedHeader[1], this.dataset, PlotOrientation.HORIZONTAL, 
-                rootPaneCheckingEnabled, rootPaneCheckingEnabled, rootPaneCheckingEnabled);
+        JFreeChart chart = ChartFactory.createScatterPlot(title, selectedHeader[0], selectedHeader[1], this.dataset, 
+                PlotOrientation.HORIZONTAL, rootPaneCheckingEnabled, rootPaneCheckingEnabled, rootPaneCheckingEnabled);
         
         // Create new panel to contain the chart
         ChartPanel panel = new ChartPanel(chart);

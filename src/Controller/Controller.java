@@ -21,11 +21,11 @@ public class Controller {
     LoadDataset load;
     String[] sheetsName;
     String[] headerName;
-    public static String[] selectedHeader;
-    public static List<List<Double>> dataset;
-    public static List<String> datalabel;
+    String[] selectedHeader;
+    List<List<Double>> dataset;
+    List<String> datalabel;
     private int numClass;
-    public static Set<String> label;
+    Set<String> label;
     private Classifier cl;
     
     
@@ -54,7 +54,6 @@ public class Controller {
     public void mainMenu() throws Exception {
         Scanner s1 = new Scanner(System.in);
         Scanner s2 = new Scanner(System.in);
-        Scanner s3 = new Scanner(System.in);
         Set<Integer> excluded = new HashSet<>();
         System.out.println("======================= Choose the Data File =======================");
         System.out.print("File name (including the file extension) = ");
@@ -78,26 +77,21 @@ public class Controller {
         System.out.println("");
         System.out.println("============== Exclude attribute(s) to be used in ===================");
         System.out.println("====================== the classification ===========================");
-        char ans;
+        String ans = "Y";
         i = 1;
         for (String s : headerName) {
             System.out.println(i + ". " + s);
             i++;
         }
         do {
-            System.out.print("Exclude an Attribute? (Y / N) = ");
-            ans = s3.next().charAt(0);
+            System.out.print("Choose the attribute to exclude (attribute number) = ");
+            int exc = s2.nextInt();
+            excluded.add(exc-1);
+            System.out.println("Ok!");
+            System.out.print("Exclude another attribute (Y / N) = ");
+            ans = s1.next();
             System.out.println("");
-            if (ans == 'y' || ans == 'Y') {
-                System.out.print("Choose the attribute to exclude (attribute number) = ");
-                int exc = s2.nextInt();
-                excluded.add(exc-1);
-                System.out.println("Ok!");
-                System.out.println("");
-            } else if (ans == 'n' || ans == 'N') {
-                break;
-            }
-        } while (ans == 'y' || ans == 'Y' || (ans != 'n' && ans != 'N'));
+        } while (ans.equals("y".toUpperCase()));
         System.out.print("Excluded attribute(s) = ");
         for (Integer x : excluded) {
             System.out.print(headerName[x] + ", ");
@@ -153,7 +147,7 @@ public class Controller {
         System.out.println("");
         cl = new Classifier();
 //        cl.createDataset(dataset, datalabel, label, selectedHeader, sheetsName[choice-1] + " Dataset Classification");
-        cl.visualize();
+        cl.visualize(dataset, datalabel, label, selectedHeader);
                 
     }
 }
