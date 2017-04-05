@@ -5,7 +5,11 @@
  */
 package Classifier;
 
+import Controller.Controller;
+
 // Import List and Set Library
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +40,7 @@ public class Classifier {
     private XYDataset dataset; // dataset that will be used for visualization
     private String[] selectedHeader; // Attribute that will be used for visualization
     private String chartTitle; // Title of the chart
+    private List<Double[]> classBound = new ArrayList<>();
     
     /**
      *
@@ -71,10 +76,19 @@ public class Classifier {
                 }
             }
             
-            XYSeries preprocessed = preprocessing(series1);
+            Double[] bound = {series1.getMinX(), series1.getMaxX(), series1.getMinY(), series1.getMaxY()};
+            classBound.add(bound);
             
-            // insert @attribute series1 to @attribute data
-            data.addSeries(preprocessed);
+            data.addSeries(series1);
+            
+        }
+        
+        XYSeriesCollection tmp = new XYSeriesCollection();
+        
+        for (int i = 0; i < data.getSeriesCount(); i++) {
+            XYSeries preprocessed = preprocessing(data.getSeries(i), classBound);
+            
+            tmp.addSeries(preprocessed);
         }
         
         // Copy the content of @attribute data to @attribute dataset
@@ -87,10 +101,10 @@ public class Classifier {
      * into a scatter plot with selected attributes as x-axis and y-axis
      * 
      */
-    public void visualize(List<List<Double>> dataset, List<String> datalabel, Set<String> label, String[] selectedHeader) {
+    public void visualize() {
         SwingUtilities.invokeLater(() -> {           
             //Create a new scatter object to visualize the data
-            ScatterPlot scatter = new ScatterPlot(dataset, datalabel, label, chartTitle, selectedHeader);
+            ScatterPlot scatter = new ScatterPlot(chartTitle);
             
             // Set the size of scatter plot
             scatter.setSize(800, 400);
@@ -115,23 +129,44 @@ public class Classifier {
         return this.dataset;
     }
     
-    public XYSeries preprocessing(XYSeries series) {
+    /**
+     *
+     * A method to preprocess the dataset so only
+     * unique data (not-ambiguous) for each class (label)
+     * that will be visualized
+     * 
+     */
+    public XYSeries preprocessing(XYSeries series, List<Double[]> classBound) {
+        // Create @attribute preprocessed with XYSeries type
+        // to contains the preprocessed dataset
         XYSeries preprocessed = new XYSeries(series.getKey());
-        double x_avg = 0, y_avg = 0;
+        List<String> datalabel = Controller.datalabel;
+        Object[] tmp = Controller.label.toArray();
+        String[] label = new String[tmp.length];
         
-        for (int i = 0; i < series.getItemCount(); i++) {
-            x_avg += (Double) series.getX(i);
-            y_avg += (Double) series.getY(i);
+        int k = 0;
+        for (Object o : tmp) {
+            label[k] = (String) o;
+            k++;
         }
         
-        x_avg /= series.getItemCount();
-        y_avg /= series.getItemCount();
-        
+        // Iterate to check if the data is ambiguous
         for (int i = 0; i < series.getItemCount(); i++) {
-            double x_dist = Math.abs(((Double) series.getX(i) - x_avg));
-            double y_dist = Math.abs(((Double) series.getY(i) - y_avg));
-            if ((y_dist <= 0.3*(y_avg - series.getMinY())) && 
-                    (x_dist <= 0.3*(x_avg - (Double) series.getMinX()))) {
+            boolean check = true;
+            for (int j = 0; j < classBound.size(); j++) {
+                if (datalabel.get(i) != label[j]) {
+                    Double x = (Double) series.getX(i);
+                    Double y = (Double) series.getY(i);
+                    if ((x >= classBound.get(j)[0]) && (x <= classBound.get(j)[1])) {
+                        if ((y >= classBound.get(j)[2]) && (y <= classBound.get(j)[3])) {
+                            check = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (check == true) {
                 preprocessed.add(series.getDataItem(i));
             }
         }
