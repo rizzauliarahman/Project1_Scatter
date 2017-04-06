@@ -115,30 +115,54 @@ public class Classifier {
         return this.dataset;
     }
     
+    /**
+     *
+     * A method to select all unambiguous data
+     * on each class
+     * Unambiguous data is needed to make the plot
+     * easier to read and analyzed
+     * 
+     */
     public XYSeries preprocessing(XYSeries series) {
+        // Create @attribute preprocessed to store the selected data
         XYSeries preprocessed = new XYSeries(series.getKey());
+        
+        // Create @attribute x_avg, y_avg to store the average value
+        // of each attribute
         double x_avg = 0, y_avg = 0;
         
+        // Iterate to count the total value of each attribute
         for (int i = 0; i < series.getItemCount(); i++) {
             x_avg += (Double) series.getX(i);
             y_avg += (Double) series.getY(i);
         }
         
+        // Divide the total of each attribute with number of data in the class
         x_avg /= series.getItemCount();
         y_avg /= series.getItemCount();
         
         /**
-         * 
+         * Iterate to determine if a data need to be selected
+         * or not
+         * Selection is based on the distance of each attribute to
+         * their corresponding average value
+         * If the distance is less (or equal) than 0.5 * average value,
+         * then the data is selected
          */
         for (int i = 0; i < series.getItemCount(); i++) {
+            // Count the distance of each attribute
             double x_dist = Math.abs(((Double) series.getX(i) - x_avg));
             double y_dist = Math.abs(((Double) series.getY(i) - y_avg));
-            if ((y_dist <= 0.3*(y_avg - series.getMinY())) && 
-                    (x_dist <= 0.3*(x_avg - (Double) series.getMinX()))) {
+            
+            // Check if the distance is less than 0.5 * average value
+            // If yes, add the data into @attribute preprocessed
+            if ((y_dist <= 0.5*(y_avg - series.getMinY())) && 
+                    (x_dist <= 0.5*(x_avg - (Double) series.getMinX()))) {
                 preprocessed.add(series.getDataItem(i));
             }
         }
         
+        // @return @attribute preprocessed
         return preprocessed;
     }
     
